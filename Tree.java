@@ -9,60 +9,27 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class Tree {
-    private HashMap<String, String> blobEntries;
-    private HashMap<String, String> treeEntries;
+    public List<String> entries;
 
     public Tree() {
-        this.blobEntries = new HashMap<String, String>();
-        this.treeEntries = new HashMap<String, String>();
+        this.entries = new ArrayList<>();
     }
 
-    public void add(String str) throws Exception {
-        String [] array = str.split(" : ");
-        if (array.length != 3) {
-            throw new Exception("Wrong string format.");
-        }
-        String type = array[0];
-        String sha = array[1];
-        String name = array[2];
-
-        if (type.equals("blob")){
-            if (blobEntries.containsKey(name)){
-                throw new Exception("Exists.");
-            }
-            if (!blobEntries.containsValue(sha)){
-                blobEntries.put(name, sha);
-            }
-        }
-        else if (type.equals("tree")){
-            if (treeEntries.containsKey(name)){
-                throw new Exception("Exists.");
-            }
-            if(!treeEntries.containsValue(sha)){
-                treeEntries.put(name, sha);
-            }
-        else{
-            throw new Exception ("Invalid input.");
-            }
-        }
+    public void add(String str) {
+        entries.add(str);
     }
 
-    public boolean remove(String target) {
-        if (blobEntries.containsKey(target)){
-            blobEntries.remove(target);
-            return true;
+    public void remove(String target) {
+        List<String> toRemove = new ArrayList<>();
+        for (String entry : entries) {
+            if (entry.equals(target) || entry.endsWith(" : " + target)) {
+                toRemove.add(entry);
+            }
         }
-        else if(treeEntries.containsKey(target)){
-            treeEntries.remove(target);
-            return true;
-        }
-        else{
-            return false;
-        }
+        entries.removeAll(toRemove);
     }
 
     public String calculateSHA1(String input) {
@@ -80,6 +47,12 @@ public class Tree {
         }
     }
 
+    public void printTree() {
+        for (String entry : entries) {
+            System.out.println(entry);
+        }
+    }
+
     public void generateBlob() {
         try {
             String folderPath = "objects";
@@ -89,20 +62,8 @@ public class Tree {
             }
 
             StringBuilder contentBuilder = new StringBuilder();
-            for (HashMap.Entry<String, String> entry : blobEntries.entrySet()){
-                String key = entry.getKey();
-                String value = entry.getValue();
-                contentBuilder.append("blob : " + value + " : " + key + "\n");
-            }
-
-            for (HashMap.Entry<String, String> entry: treeEntries.entrySet()){
-                String key = entry.getKey();
-                String value = entry.getValue();
-                contentBuilder.append("tree : " + value + " : " + key + "\n");
-            }
-
-            if (contentBuilder.length() > 0){
-                contentBuilder.deleteCharAt(contentBuilder.length() - 1);
+            for (String entry : entries) {
+                contentBuilder.append(entry).append("\n");
             }
 
             String content = contentBuilder.toString();

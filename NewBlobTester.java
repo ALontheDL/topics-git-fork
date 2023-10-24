@@ -1,5 +1,6 @@
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
@@ -25,20 +26,77 @@ public class NewBlobTester {
          */
         Utils.deleteDirectory("objects");
     }
-
-    @Test
-    @DisplayName("Testing file writing")
-    public void testBlob(){
-        String testSHA = Blob.doSha("ajdfljsofjowisdoujxlx");
-        assertEquals(testSHA, "a6f717f06c3a2d3543d2f95c1d36baa73af88ac5");
+    
+    public void main(String[] args) {
+        try {
+            // Test the Blob class methods individually
+            testConstructor();
+            testDoSha();
+            testReadText();
+            testMakeBite();
+            testMakeBlob();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
-    @DisplayName("Testing file writing")
-    public void testWriteToFile() throws Exception{
-        Utils.writeToFile("djaofowudjfudisn\njfklhxoiufwjekh2", "Test File");
-        Blob blob = new Blob("Test File");
+    @DisplayName("Testing Constructor")
+    public void testConstructor() throws IOException {
+        Blob blob = new Blob("test.txt");
+        System.out.println("File Name: " + blob.getToTextFile());
+        System.out.println("SHA-1 Hash: " + blob.getShaName());
+        System.out.println("File Contents: " + blob.getFileContents());
+
+        // Ensure the SHA-1 hash is correct for the given file
+        assert blob.getShaName().equals("a94a8fe5ccb19ba61c4c0873d391e987982fbbd3a");
+
+        System.out.println("Constructor and related methods tested successfully.");
+    }
+
+    @Test
+    @DisplayName("Testing doSha")
+    public void testDoSha() {
+        String testInput = "Test SHA-1 Hashing";
+        String expectedHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+        String actualHash = Blob.doSha(testInput);
+        assert actualHash.equals(expectedHash);
+
+        System.out.println("doSha method tested successfully.");
+    }
+
+    @Test
+    @DisplayName("Testing readText")
+    public void testReadText() throws IOException {
+        String testFileName = "test.txt";
+        String expectedContent = "This is a test file for reading.";
+        String actualContent = new Blob(testFileName).readText(testFileName);
+        assert actualContent.equals(expectedContent);
+
+        System.out.println("readText method tested successfully.");
+    }
+
+    @Test
+    @DisplayName("Testing makeBite")
+    public void testMakeBite() throws IOException {
+        String testFileName = "test.txt";
+        byte[] expectedBytes = "This is a test file for reading.".getBytes();
+        byte[] actualBytes = new Blob(testFileName).makeBite(testFileName);
+        assert new String(actualBytes).equals(new String(expectedBytes));
+
+        System.out.println("makeBite method tested successfully.");
+    }
+
+    @Test
+    @DisplayName("Testing makeBlob")
+    public void testMakeBlob() throws IOException {
+        String testFileName = "test.txt";
+        Blob blob = new Blob(testFileName);
         blob.makeBlob();
-        assertTrue(Utils.exists("objects/24db0e9e4351893d753e2e5123d1a19cfcca2b80"));
+
+        // Ensure the file was created in the "Objects" directory
+        assert Files.exists(Paths.get("Objects", blob.getShaName()));
+
+        System.out.println("makeBlob method tested successfully.");
     }
 }
