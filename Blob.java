@@ -21,7 +21,7 @@ public class Blob {
         shaName = doSha(fileContents);
     }
 
-    public String doSha(String input) {
+    public static String doSha(String input) {
         try {
             // getInstance() method is called with algorithm SHA-1
             MessageDigest md = MessageDigest.getInstance("SHA-1");
