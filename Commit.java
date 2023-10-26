@@ -1,20 +1,27 @@
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Commit {
     private String treeSHA;
+    private String prevSHA;
+    private String nextSHA;
+
     private String author;
     private String date;
     private String summary;
 
     public Commit (String treeSHA, String author, String summary, String prevSHA){
-        this.treeSHA = treeSHA;
+        this.treeSHA = createTree("objects", "");;
+        this.prevSHA = prevSHA;
+        this.nextSHA = null;
         this.author = author;
-        this.date = ;
+        this.date = getCurrentDate();
         this.summary = summary;
     }
 
@@ -36,14 +43,22 @@ public class Commit {
         }
 
         String path = folderPath + File.separator + sha1;
-        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-        writer.write(file);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))){
+            writer.write(file);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     private String generateFile(){
         StringBuilder content = new StringBuilder();
-
-        return content.toString;
+        content.append(treeSHA).append("\n");
+        content.append(prevSHA != null ? prevSHA : " ").append("\n");
+        content.append(nextSHA != null ? nextSHA : " ").append("\n");
+        content.append(author).append("\n");
+        content.append(date).append("\n");
+        content.append(summary).append("\n");
+        return content.toString();
     }
 
     public String generateSHA(String file){
@@ -67,11 +82,13 @@ public class Commit {
         return date;
     }
 
-    public String createTree(){
-        
+    public void createTree(String folderPath, String content){
+        Tree tree = new Tree(content);
+        return tree.saveToObjectsFolder(folderPath);
     }
 
     private String getCurrentDate(){
-        
+        SimpleDateFormat date = new SimpleDateFormat("MMM d, yyyy");
+        return date.format(new Date());
     }
 }
