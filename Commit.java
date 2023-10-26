@@ -34,17 +34,11 @@ public class Commit {
     }
 
     public void writeToFile(String folderPath){
-        String file = generateFile();
-        String sha1 = generateSHA(file);
-
-        File objectsFolder = new File(folderPath);
-        if (!objectsFolder.exists()){
-            objectsFolder.mkdirs();
-        }
+        String sha1 = generateSHA();
 
         String path = folderPath + File.separator + sha1;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))){
-            writer.write(file);
+            writer.write(generateFile());
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -61,8 +55,8 @@ public class Commit {
         return content.toString();
     }
 
-    public String generateSHA(String file){
-        //String file = summary + "\n" + date + "\n" + author + "\n" + treeSHA + "\n";
+    public String generateSHA(){
+        String file = generateFile();
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             byte[] content = md.digest(file.getBytes());
@@ -82,9 +76,30 @@ public class Commit {
         return date;
     }
 
-    public void createTree(String folderPath, String content){
-        Tree tree = new Tree(content);
-        return tree.saveToObjectsFolder(folderPath);
+    public String createTree(String folderPath, String content){
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] digest = md.digest(content.getBytes());
+            StringBuilder sha1 = new StringBuilder();
+            for (byte b : digest){
+                sha1.append(String.format("%02x", b));
+            }
+
+            File objectsFolder = new File(folderPath);
+            if (!objectsFolder.exists()){
+                objectsFolder.mkdirs();
+            }
+
+            String path = folderPath + File.separator + sha1.toString();
+            try(BufferedWriter writer = new BufferedWriter(new FileWriter(path))){
+                writer.write(content);
+            }
+
+            return sha1.toString();
+        } catch (NoSuchAlgorithmException | IOException e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private String getCurrentDate(){
