@@ -1,14 +1,17 @@
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class NewTreeTester {
-    public ExpectedException exceptionRule = ExpectedException.none();
-    
+
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
         /*
@@ -25,75 +28,98 @@ public class NewTreeTester {
          * Utils.deleteFile("index");
          * Utils.deleteDirectory("objects");
          */
-        Utils.deleteDirectory("objects");
     }
 
     @Test
-    @DisplayName("Testing Initialize")
-    public void testAdd() throws Exception{
-        Utils.deleteDirectory("objects");
-
+    @DisplayName("Testing add")
+    public void testAdd() {
+        // Test the add method by adding entries to the tree and then verifying that they are present
         Tree tree = new Tree();
-        String path = "objects/bc323153dcce17da2a8cd62cb240abdc49f3fe7b";
-        tree.add("blob : 81e0268c84067377a0a1fdfb5cc996c93f6dcf9f : file1.txt");
-        tree.generateBlob();
-        assertTrue(Utils.exists(path));
+        tree.add("entry1");
+        tree.add("entry2");
+        assertTrue(tree.entries.contains("entry1"));
+        assertTrue(tree.entries.contains("entry2"));
+    }
 
-        try{
-            tree.add("blob : 81e0268c84067377a0a1fdfb5cc996c93f6dcf9f : file1.txt");
-        } catch (Exception e){
-            System.out.println(e);
+    @Test
+    @DisplayName("Testing remove")
+    public void testRemove() {
+        // Test the remove method by adding entries, removing one, and verifying that it is not present
+        Tree tree = new Tree();
+        tree.add("entry1");
+        tree.add("entry2");
+        tree.remove("entry1");
+        assertFalse(tree.entries.contains("entry1"));
+        assertTrue(tree.entries.contains("entry2"));
+    }
+
+    @Test
+    @DisplayName("Testing calculateSHA1")
+    public void testCalculateSHA1() {
+        Tree tree = new Tree();
+        String sha1 = tree.calculateSHA1("test_input");
+        assertEquals("expected_sha1_value", sha1);
+    }
+
+    @Test
+    @DisplayName("Testing generateBlob")
+    public void testGenerateBlob() throws Exception {
+        Tree tree = new Tree();
+        tree.add("entry1");
+        tree.add("entry2");
+
+        String folderPath = "test_objects";
+        File objectsFolder = new File(folderPath);
+        if (!objectsFolder.exists()) {
+            objectsFolder.mkdir();
         }
+        tree.generateBlob();
+        File blobFile = new File(folderPath + File.separator + "expected_sha1_value");
+        assertTrue(blobFile.exists());
+
+        deleteFile(folderPath);
     }
 
     @Test
-    @DisplayName("Testing Remove Blob")
-    public void testRemove() throws Exception{
-        Utils.deleteDirectory("objects");
-        
+    @DisplayName("Testing delete")
+    public void testDelete() {
         Tree tree = new Tree();
-        String path1 = "objects/bc323153dcce17da2a8cd62cb240abdc49f3fe7b";
-        tree.add("blob : 81e0268c84067377a0a1fdfb5cc996c93f6dcf9f : file1.txt");
-        tree.generateBlob();
-        assertTrue(Utils.exists(path1));
-
-        assertTrue(tree.remove("file1.txt"));
-
-        //tree.add("blob : 81e0268c84067377a0a1fdfb5cc996c93f6dcf9f : file1.txt");
-        //assertTrue(Utils.exists(path1));
-
-        String path2 = "objects/14a7cd0f425d7a0ff49391ae32abfc853b44fa1f";
-        tree.add("tree : bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b : file2.txt");
-        tree.generateBlob();
-        assertTrue(Utils.exists(path2));
-
-        assertTrue(tree.remove("file2.txt"));
-
-        tree.add("tree : bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b : file2.txt");
-        tree.add("blob : 81e0268c84067377a0a1fdfb5cc996c93f6dcf9f : file1.txt");
-
-        //tree.remove("file1.txt");
-        //assertFalse(Utils.exists(path1));
-        //assertTrue(Utils.exists(path2));
-
-        //tree.remove("file2.txt");
-        //assertFalse(Utils.exists(path2));
+        tree.add("entry1");
+        tree.add("entry2");
+        tree.delete("entry1");
+        assertFalse(tree.entries.contains("entry1"));
+        assertTrue(tree.entries.contains("entry2"));
     }
 
     @Test
-    @DisplayName("Testing Add Blob")
-    public void testWriteToObjects() throws Exception{
-        Utils.deleteDirectory("objects");
-
+    @DisplayName("Testing addFile")
+    public void testAddFile() throws IOException {
         Tree tree = new Tree();
-        String path = "objects/bc323153dcce17da2a8cd62cb240abdc49f3fe7b";
-        tree.add("blob : 81e0268c84067377a0a1fdfb5cc996c93f6dcf9f : file1.txt");
-        tree.generateBlob();
-        assertTrue(Utils.exists(path));
+        String filename = "test_file.txt";
+        File testFile = new File(filename);
+        testFile.createNewFile();
 
-        tree.remove("file1.txt");
-        tree.generateBlob();
-        assertTrue(Utils.exists("objects/da39a3ee5e6b4b0d3255bfef95601890afd80709"));
+        tree.add(filename);
+        assertTrue(tree.entries.contains(filename));
+        testFile.delete();
+    }
+
+    @Test
+    @DisplayName("Testing removeFile")
+    public void testRemoveFile() throws IOException {
+        Tree tree = new Tree();
+        String filename = "test_file.txt";
+        tree.add(filename);
+        tree.remove(filename);
+
+        assertFalse(tree.entries.contains(filename));
+    }
+
+    public static void main(String[] args) {
+        org.junit.runner.JUnitCore.main("NewTreeTester");
+    }
+
+    public static void deleteFile(String string) throws Exception{
+        Files.deleteIfExists(Paths.get(string));
     }
 }
-

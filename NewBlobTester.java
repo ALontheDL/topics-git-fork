@@ -24,12 +24,10 @@ public class NewBlobTester {
          * Utils.deleteFile("index");
          * Utils.deleteDirectory("objects");
          */
-        Utils.deleteDirectory("objects");
     }
     
     public void main(String[] args) {
         try {
-            // Test the Blob class methods individually
             testConstructor();
             testDoSha();
             testReadText();
@@ -94,7 +92,6 @@ public class NewBlobTester {
         Blob blob = new Blob(testFileName);
         blob.makeBlob();
 
-        // Ensure the file was created in the "Objects" directory
         assert Files.exists(Paths.get("Objects", blob.getShaName()));
 
         System.out.println("makeBlob method tested successfully.");

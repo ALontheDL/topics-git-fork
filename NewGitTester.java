@@ -25,7 +25,6 @@ public class NewGitTester {
          * Utils.deleteFile("index");
          * Utils.deleteDirectory("objects");
          */
-        Utils.deleteDirectory("objects");
     }
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
@@ -42,8 +41,6 @@ public class NewGitTester {
     public static void testInit() throws IOException {
         Git git = new Git();
         git.init();
-
-        // Verify that the "Git" file and "objects" folder were created
         assert Files.exists(Paths.get("Git"));
         assert Files.exists(Paths.get("objects"));
 
@@ -55,13 +52,9 @@ public class NewGitTester {
     public static void testIndexFileCreation() throws IOException, NoSuchAlgorithmException {
         Git git = new Git();
         git.init();
-
-        // Create an example index file
         git.add("testGit.txt");
 
-        // Verify that the index file was created
         assert Files.exists(Paths.get("Git"));
-
         System.out.println("Index file creation tested successfully.");
     }
 
@@ -70,13 +63,9 @@ public class NewGitTester {
     public static void testObjectsFolderCreation() throws IOException, NoSuchAlgorithmException {
         Git git = new Git();
         git.init();
-
-        // Create an example object (blob)
         git.add("testGit.txt");
 
-        // Verify that the "objects" folder was created
         assert Files.exists(Paths.get("objects"));
-
         System.out.println("'Objects' folder creation tested successfully.");
     }
 
@@ -85,11 +74,8 @@ public class NewGitTester {
     public static void testAdd() throws IOException, NoSuchAlgorithmException {
         Git git = new Git();
         git.init();
-
-        // Create and add a blob
         git.add("testGit.txt");
 
-        // Verify that the blob was added to the "Git" file
         assert Files.readAllLines(Paths.get("Git")).stream().anyMatch(line -> line.startsWith("testGit.txt : "));
 
         System.out.println("Add method tested successfully.");
@@ -100,15 +86,11 @@ public class NewGitTester {
     public static void testGetSHA1() throws IOException, NoSuchAlgorithmException {
         Git git = new Git();
         git.init();
-
-        // Create and add a blob
         git.add("testGit.txt");
 
-        // Get the SHA-1 hash of the added blob
         Blob blob = new Blob("testGit.txt");
         String sha1 = blob.getShaName();
 
-        // Verify that the retrieved SHA-1 hash matches the expected format
         assert sha1.matches("^[0-9a-f]{40}$");
 
         System.out.println("GetSHA1 method tested successfully.");
@@ -119,14 +101,9 @@ public class NewGitTester {
     public static void testDelete() throws IOException, NoSuchAlgorithmException {
         Git git = new Git();
         git.init();
-
-        // Create and add a blob
         git.add("testGit.txt");
-
-        // Delete the added blob
         git.delete("testGit.txt");
 
-        // Verify that the blob was removed from the "Git" file
         assert Files.readAllLines(Paths.get("Git")).stream().noneMatch(line -> line.startsWith("testGit.txt : "));
 
         System.out.println("Delete method tested successfully.");
@@ -137,16 +114,11 @@ public class NewGitTester {
     public static void testAlreadyExists() throws IOException, NoSuchAlgorithmException {
         Git git = new Git();
         git.init();
-
-        // Create and add a blob
         git.add("testGit.txt");
 
-        // Check if the blob already exists
-        boolean exists = git.existsAlready("testGit.txt", "SHA-1-hash"); // Replace with the actual SHA-1 hash
+        boolean exists = git.existsAlready("testGit.txt", "SHA-1-hash");
 
-        // Verify that the method correctly detects the existing blob
         assert exists;
-
         System.out.println("AlreadyExists method tested successfully.");
     }
 }
