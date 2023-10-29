@@ -102,7 +102,7 @@ public class Tree {
         try {
             File direc = new File (path);
             if (!direc.exists() || !direc.isDirectory() || !direc.canRead()){
-                throw new IllegalArgumentException("Invalid directory path: " + path);
+                throw new IllegalArgumentException("Invalid path: " + path);
             }
 
             List<Tree> children = new ArrayList<>();
@@ -115,14 +115,10 @@ public class Tree {
                 else if (fileFolder.isDirectory()){
                     Tree child = new Tree();
                     children.add(child);
-                    child.addDirectory(fileFolder.getPath());
+                    String childSHA1 = child.addDirectory(fileFolder.getPath());
+                    String content = "tree : " + childSHA1 + " : " + fileFolderName;
+                    entries.add(content);
                 }
-            }
-
-            for (Tree tree : children){
-                tree.generateBlob();
-                String content = "tree : " + calculateSHA1(tree.entries.toString()) + " : " + tree.entries.get(0).split(":")[2].trim();
-                entries.add(content);
             }
 
             generateBlob();
