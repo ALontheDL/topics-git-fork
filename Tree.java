@@ -91,12 +91,58 @@ public class Tree {
                     }
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public String addDirectory (String path){
+        try {
+            File direc = new File (path);
+            if (!direc.exists() || !direc.isDirectory() || !direc.canRead()){
+                throw new IllegalArgumentException("Invalid directory path: " + path);
+            }
+
+            List<Tree> children = new ArrayList<>();
+            for (File fileFolder : direc.listFiles()){
+                String fileFolderName = fileFolder.getName();
+                if (fileFolder.isFile()){
+                    String content = "blob : " + calculateSHA1(readFileContents(fileFolder)) + " : " + fileFolderName;
+                    entries.add(content);
+                }
+                else if (fileFolder.isDirectory()){
+                    Tree child = new Tree();
+                    children.add(child);
+                    child.addDirectory(fileFolder.getPath());
+                }
+            }
+
+            for (Tree tree : children){
+                tree.generateBlob();
+                String content = "tree : " + calculateSHA1(tree.entries.toString()) + " : " + tree.entries.get(0).split(":")[2].trim();
+                entries.add(content);
+            }
+
+            generateBlob();
+            return calculateSHA1(entries.toString());
+        } catch (IllegalArgumentException e){
+            throw e;
+        } catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String readFileContents(File file) throws IOException{
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader read = new BufferedReader(new FileReader(file))){
+            String line;
+            while ((line = read.readLine()) != null){
+                sb.append(line).append("\n");
+            }
+        }
+        return sb.toString();
     }
 }
