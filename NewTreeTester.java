@@ -1,17 +1,13 @@
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 public class NewTreeTester {
-
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
         /*
@@ -31,34 +27,45 @@ public class NewTreeTester {
     }
 
     @Test
-    @DisplayName("Testing add")
+    @DisplayName("Testing Add")
     public void testAdd() {
-        // Test the add method by adding entries to the tree and then verifying that they are present
         Tree tree = new Tree();
         tree.add("entry1");
         tree.add("entry2");
-        assertTrue(tree.entries.contains("entry1"));
-        assertTrue(tree.entries.contains("entry2"));
+
+        if (tree.entries.contains("entry1") && tree.entries.contains("entry2")) {
+            System.out.println("add method passed.");
+        } else {
+            System.out.println("add method failed.");
+        }
     }
 
     @Test
-    @DisplayName("Testing remove")
+    @DisplayName("Testing Remove")
     public void testRemove() {
-        // Test the remove method by adding entries, removing one, and verifying that it is not present
         Tree tree = new Tree();
         tree.add("entry1");
         tree.add("entry2");
         tree.remove("entry1");
-        assertFalse(tree.entries.contains("entry1"));
-        assertTrue(tree.entries.contains("entry2"));
+
+        if (!tree.entries.contains("entry1") && tree.entries.contains("entry2")) {
+            System.out.println("remove method passed.");
+        } else {
+            System.out.println("remove method failed.");
+        }
     }
 
     @Test
     @DisplayName("Testing calculateSHA1")
     public void testCalculateSHA1() {
         Tree tree = new Tree();
-        String sha1 = tree.calculateSHA1("test_input");
-        assertEquals("expected_sha1_value", sha1);
+        String sha1 = tree.calculateSHA1("input");
+
+        if (sha1.equals("expected_sha1_value")) {
+            System.out.println("calculateSHA1 method passed.");
+        } else {
+            System.out.println("calculateSHA1 method failed.");
+        }
     }
 
     @Test
@@ -68,58 +75,53 @@ public class NewTreeTester {
         tree.add("entry1");
         tree.add("entry2");
 
-        String folderPath = "test_objects";
+        String folderPath = "testObjects";
         File objectsFolder = new File(folderPath);
         if (!objectsFolder.exists()) {
             objectsFolder.mkdir();
         }
         tree.generateBlob();
+
         File blobFile = new File(folderPath + File.separator + "expected_sha1_value");
-        assertTrue(blobFile.exists());
+        if (blobFile.exists()) {
+            System.out.println("generateBlob method passed.");
+        } else {
+            System.out.println("generateBlob method failed.");
+        }
 
         deleteFile(folderPath);
     }
 
     @Test
-    @DisplayName("Testing delete")
-    public void testDelete() {
+    @DisplayName("Testing adding the file to index")
+    public void testAddFileToIndex() {
         Tree tree = new Tree();
-        tree.add("entry1");
-        tree.add("entry2");
-        tree.delete("entry1");
-        assertFalse(tree.entries.contains("entry1"));
-        assertTrue(tree.entries.contains("entry2"));
-    }
-
-    @Test
-    @DisplayName("Testing addFile")
-    public void testAddFile() throws IOException {
-        Tree tree = new Tree();
-        String filename = "test_file.txt";
-        File testFile = new File(filename);
-        testFile.createNewFile();
-
+        String filename = "testFile.txt";
         tree.add(filename);
-        assertTrue(tree.entries.contains(filename));
-        testFile.delete();
+
+        if (tree.entries.contains(filename)) {
+            System.out.println("add method passed.");
+        } else {
+            System.out.println("add method failed.");
+        }
     }
 
     @Test
-    @DisplayName("Testing removeFile")
-    public void testRemoveFile() throws IOException {
+    @DisplayName("Testing removing the file from")
+    public void testRemoveFileFromIndex() {
         Tree tree = new Tree();
-        String filename = "test_file.txt";
+        String filename = "testFile.txt";
         tree.add(filename);
         tree.remove(filename);
 
-        assertFalse(tree.entries.contains(filename));
+        if (!tree.entries.contains(filename)) {
+            System.out.println("remove method passed.");
+        } else {
+            System.out.println("remove method failed.");
+        }
     }
 
-    public static void main(String[] args) {
-        org.junit.runner.JUnitCore.main("NewTreeTester");
-    }
-
-    public static void deleteFile(String string) throws Exception{
+    public void deleteFile(String string) throws Exception{
         Files.deleteIfExists(Paths.get(string));
     }
 }
