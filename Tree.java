@@ -1,21 +1,22 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class Tree {
     public List<String> entries;
+    private List<String> deletedFiles;
+    private List<String> editedFiles;
 
     public Tree() {
         this.entries = new ArrayList<>();
+        this.deletedFiles = new ArrayList<>();
+        this.editedFiles = new ArrayList<>();
     }
 
     public void add(String str) {
@@ -38,13 +39,21 @@ public class Tree {
             byte[] messageDigest = md.digest(input.getBytes());
             BigInteger no = new BigInteger(1, messageDigest);
             String hashText = no.toString(16);
-            while (hashText.length() < 32) {
+            while (hashText.length() < 40) {
                 hashText = "0" + hashText;
             }
             return hashText;
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getSHA1() {
+        StringBuilder contentBuilder = new StringBuilder();
+        for (String entry : entries) {
+            contentBuilder.append(entry).append("\n");
+        }
+        return calculateSHA1(contentBuilder.toString());
     }
 
     public void printTree() {
@@ -80,39 +89,20 @@ public class Tree {
         }
     }
 
-    public void delete(String str) {
-        BufferedReader reader;
+    public String addDirectory(String path) {
         try {
-            reader = new BufferedReader(new FileReader("tree.txt"));
-            try {
-                while (reader.ready()) {
-                    if (reader.readLine().equals(str)) {
-
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String addDirectory (String path){
-        try {
-            File direc = new File (path);
-            if (!direc.exists() || !direc.isDirectory() || !direc.canRead()){
+            File direc = new File(path);
+            if (!direc.exists() || !direc.isDirectory() || !direc.canRead()) {
                 throw new IllegalArgumentException("Invalid path: " + path);
             }
 
             List<Tree> children = new ArrayList<>();
-            for (File fileFolder : direc.listFiles()){
+            for (File fileFolder : direc.listFiles()) {
                 String fileFolderName = fileFolder.getName();
-                if (fileFolder.isFile()){
+                if (fileFolder.isFile()) {
                     String content = "blob : " + calculateSHA1(readFileContents(fileFolder)) + " : " + fileFolderName;
                     entries.add(content);
-                }
-                else if (fileFolder.isDirectory()){
+                } else if (fileFolder.isDirectory()) {
                     Tree child = new Tree();
                     children.add(child);
                     String childSHA1 = child.addDirectory(fileFolder.getPath());
@@ -121,24 +111,60 @@ public class Tree {
                 }
             }
 
+            entries.removeAll(deletedFiles);
+            entries.removeAll(editedFiles);
+
             generateBlob();
             return calculateSHA1(entries.toString());
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw e;
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private String readFileContents(File file) throws IOException{
+    private String readFileContents(File file) throws IOException {
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader read = new BufferedReader(new FileReader(file))){
+        try (BufferedReader read = new BufferedReader(new FileReader(file))) {
             String line;
-            while ((line = read.readLine()) != null){
+            while ((line = read.readLine()) != null) {
                 sb.append(line).append("\n");
             }
         }
         return sb.toString();
+    }
+
+    public static Tree getTree(String treeSHA, String folderPath) {
+        try {
+            String path = folderPath + File.separator + treeSHA;
+            Path treePath = Paths.get(path);
+            String content = new String(Files.readAllBytes(treePath));
+            Tree tree = new Tree();
+            for (String line : content.split("\n")) {
+                tree.add(line);
+            }
+            return tree;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void delete(String str) {
+        entries.remove(str);
+        deletedFiles.add(str);
+    }
+
+    public void edit(String str) {
+        editedFiles.add(str);
+    }
+
+    public List<String> getEditedFiles() {
+        return editedFiles;
+    }
+
+    public List<String> getDeletedFiles() {
+        return deletedFiles;
     }
 }

@@ -2,6 +2,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.jcp.xml.dsig.internal.dom.Utils;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -76,20 +77,17 @@ public class NewTreeTester {
         tree.add("entry2");
 
         String folderPath = "testObjects";
-        File objectsFolder = new File(folderPath);
-        if (!objectsFolder.exists()) {
-            objectsFolder.mkdir();
-        }
-        tree.generateBlob();
+        tree.generateBlob(folderPath);
 
-        File blobFile = new File(folderPath + File.separator + "expected_sha1_value");
+        File blobFile = new File(folderPath + File.separator + "e127f8a1d93221db8f99e6d1a37c05182e326f78");
+
         if (blobFile.exists()) {
-            System.out.println("generateBlob method passed.");
+            System.out.println("GenerateBlob method passed.");
         } else {
-            System.out.println("generateBlob method failed.");
+            System.out.println("GenerateBlob method failed.");
         }
 
-        deleteFile(folderPath);
+        Utils.deleteDirectory(folderPath);
     }
 
     @Test

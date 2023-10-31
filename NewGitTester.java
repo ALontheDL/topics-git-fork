@@ -28,7 +28,6 @@ public class NewGitTester {
     }
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-        // Test Git class methods individually
         testInit();
         testIndexFileCreation();
         testObjectsFolderCreation();
@@ -44,7 +43,7 @@ public class NewGitTester {
         assert Files.exists(Paths.get("Git"));
         assert Files.exists(Paths.get("objects"));
 
-        System.out.println("init method tested successfully.");
+        System.out.println("init  success");
     }
 
     @Test
@@ -55,7 +54,7 @@ public class NewGitTester {
         git.add("testGit.txt");
 
         assert Files.exists(Paths.get("Git"));
-        System.out.println("Index file creation tested successfully.");
+        System.out.println("Index file success");
     }
 
     @Test
@@ -66,7 +65,7 @@ public class NewGitTester {
         git.add("testGit.txt");
 
         assert Files.exists(Paths.get("objects"));
-        System.out.println("'Objects' folder creation tested successfully.");
+        System.out.println("'Objects' folder creation success");
     }
 
     @Test
@@ -78,7 +77,7 @@ public class NewGitTester {
 
         assert Files.readAllLines(Paths.get("Git")).stream().anyMatch(line -> line.startsWith("testGit.txt : "));
 
-        System.out.println("Add method tested successfully.");
+        System.out.println("Add success");
     }
 
     @Test
@@ -93,7 +92,7 @@ public class NewGitTester {
 
         assert sha1.matches("^[0-9a-f]{40}$");
 
-        System.out.println("GetSHA1 method tested successfully.");
+        System.out.println("getSHA1 success");
     }
 
     @Test
@@ -106,7 +105,7 @@ public class NewGitTester {
 
         assert Files.readAllLines(Paths.get("Git")).stream().noneMatch(line -> line.startsWith("testGit.txt : "));
 
-        System.out.println("Delete method tested successfully.");
+        System.out.println("delete success");
     }
 
     @Test
@@ -119,7 +118,7 @@ public class NewGitTester {
         boolean exists = git.existsAlready("testGit.txt", "SHA-1-hash");
 
         assert exists;
-        System.out.println("AlreadyExists method tested successfully.");
+        System.out.println("alreadyExists success");
     }
 }
 
