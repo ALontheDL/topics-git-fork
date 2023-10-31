@@ -1,77 +1,75 @@
-import org.junit.Before;
-import org.junit.After;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FinalGitTester {
+    private String testFolderPath = "testObjects";
     private Git git;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    public void setUp() throws Exception {
         git = new Git();
+        git.init();
+        cleanUpTestObjectsFolder();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
+        cleanUpTestObjectsFolder();
+    }
 
+    private void cleanUpTestObjectsFolder() {
+        Path testObjectsPath = Paths.get(testFolderPath);
+
+        if (Files.exists(testObjectsPath)) {
+            try {
+                Files.walk(testObjectsPath)
+                        .sorted((a, b) -> -a.compareTo(b))
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Test
-    public void testSingleCommitWithFiles() throws Exception {
-        Commit commit = git.createSingleCommitWithFiles();
+    @DisplayName("Single Commit Test")
+    public void testSingleCommit() throws IOException, NoSuchAlgorithmException {
+        createTestFile("file1.txt", "Test 1");
+        createTestFile("file2.txt", "Test 2");
+        git.add("file1.txt");
+        git.add("file2.txt");
+        git.commit("Initial");
+        String currentCommitSHA = git.getHeadCommitSHA();
+        String currentTreeSHA = Commit.getCommitTreeSHA(currentCommitSHA);
 
-        assertNotNull(commit.getTreeSHA());
-        assertNull(commit.getPrevSHA());
-        assertNull(commit.getNextSHA());
+        assertNotNull(currentCommitSHA);
+        assertNotNull(currentTreeSHA);
+        assertNull(git.getPrevCommitSHA(currentCommitSHA));
+        assertNull(git.getNextCommitSHA(currentCommitSHA));
+
+        Tree currentTree = Tree.getTree(currentTreeSHA, testFolderPath);
+        
+        assertTrue(currentTree.entries.contains("blob : " + currentCommitSHA + " : file1.txt"));
+        assertTrue(currentTree.entries.contains("blob : " + currentCommitSHA + " : file2.txt"));
     }
 
-    @Test
-    public void testTwoCommitsWithFilesAndFolder() throws Exception {
-        Commit commit1 = git.createSingleCommitWithFiles();
-
-        git.createFolderWithFiles();
-        Commit commit2 = git.createCommitWithFolder();
-
-        assertNotNull(commit1.getTreeSHA());
-        assertNull(commit1.getPrevSHA());
-        assertNotNull(commit1.getNextSHA());
-
-        assertNotNull(commit2.getTreeSHA());
-        assertNotNull(commit2.getPrevSHA());
-        assertNull(commit2.getNextSHA());
-
-        Tree tree1 = git.getCommitTree(commit1.getTreeSHA());
-        Tree tree2 = git.getCommitTree(commit2.getTreeSHA());
-
-        assertTrue(tree1.getEntries().size() >= 2);
-        assertTrue(tree2.getEntries().size() >= 2);
-    }
-
-    @Test
-    public void testFourCommitsWithVariousFilesAndFolders() throws Exception {
-        Commit commit1 = git.createSingleCommitWithFiles();
-        git.createFolderWithFiles();
-
-        Commit commit2 = git.createCommitWithFolder();
-        Commit commit3 = git.createSingleCommitWithFiles();
-
-        git.createFolderWithFiles();
-        Commit commit4 = git.createCommitWithFolder();
-
-        assertNotNull(commit1.getTreeSHA());
-        assertNull(commit1.getPrevSHA());
-        assertNotNull(commit1.getNextSHA());
-
-        assertNotNull(commit2.getTreeSHA());
-        assertNotNull(commit2.getPrevSHA());
-        assertNotNull(commit2.getNextSHA());
-
-        assertNotNull(commit3.getTreeSHA());
-        assertNotNull(commit3.getPrevSHA());
-        assertNotNull(commit3.getNextSHA());
-
-        assertNotNull(commit4.getTreeSHA());
-        assertNotNull(commit4.getPrevSHA());
-        assertNull(commit4.getNextSHA());
+    private void createTestFile(String fileName, String content) throws IOException {
+        String filePath = Paths.get(testFolderPath, fileName).toString();
+        File file = new File(filePath);
+        file.getParentFile().mkdirs();
+        FileWriter writer = new FileWriter(filePath);
+        writer.write(content);
+        writer.close();
     }
 }

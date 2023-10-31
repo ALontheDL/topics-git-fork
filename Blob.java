@@ -68,4 +68,22 @@ public class Blob {
     public String getFileContents() {
         return fileContents;
     }
+
+    public static Blob getAccBlob(String sha1, String folderPath) {
+        try {
+            if (folderPath == null) {
+                folderPath = "";
+            }
+
+            Path blobPath = Paths.get(folderPath, "Objects", sha1);
+            if (Files.exists(blobPath)) {
+                return new Blob(blobPath.toString());
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -20,9 +20,7 @@ public class NewCommitTester {
     public void testCreateTree() {
         Commit commit = new Commit("treeSHA", "author", "summary", null, null);
         String treeSHA = commit.createTree("objects", "treeContent");
-
         assertNotNull(treeSHA);
-        System.out.println("createTree passed");
     }
 
     @Test
@@ -31,7 +29,6 @@ public class NewCommitTester {
         Commit commit = new Commit("treeSHA", "author", "summary", null, null);
         String SHA = commit.generateSHA();
         assertNotNull(SHA);
-        System.out.println("generateSHA passed");
     }
 
     @Test

@@ -21,7 +21,7 @@ public class Commit {
     public Commit(String treeSHA, String author, String summary, String prevSHA, String nextSHA) {
         this.treeSHA = treeSHA;
         this.prevSHA = prevSHA;
-        this.nextSHA = null;
+        this.nextSHA = nextSHA;
         this.author = author;
         this.date = getCurrentDate();
         this.summary = summary;
@@ -33,6 +33,14 @@ public class Commit {
             prevTree.generateBlob();
             omitEditedAndDeletedFiles(prevTree);
         }
+    }
+
+    public String getShaName() {
+        return generateSHA();
+    }
+
+    public void setPrevSHA(String prevSHA) {
+        this.prevSHA = prevSHA;
     }
 
     public String createTree(String folderPath, String treeContent) {
@@ -77,8 +85,8 @@ public class Commit {
         return nextSHA;
     }
 
-    public void setNextSHA(String next) {
-        this.nextSHA = next;
+    public void setNextSHA(String nextSHA) {
+        this.nextSHA = nextSHA;
     }
 
     public static String getCommitTreeSHA(String commitSHA) {

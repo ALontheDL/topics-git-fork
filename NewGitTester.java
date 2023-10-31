@@ -21,6 +21,7 @@ public class NewGitTester {
         assertTrue(Files.exists(Paths.get("objects")));
     }
 
+
     @Test
     @DisplayName("Testing add")
     public void testAdd() throws IOException, NoSuchAlgorithmException {

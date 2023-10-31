@@ -167,4 +167,19 @@ public class Tree {
     public List<String> getDeletedFiles() {
         return deletedFiles;
     }
+
+    public Blob getBlob(String fileName) {
+        for (String entry : entries) {
+            String[] parts = entry.split(" : ");
+            if (parts.length >= 3) {
+                String type = parts[0];
+                String sha1 = parts[1];
+                String name = parts[2];
+                if (type.equals("blob") && name.equals(fileName)) {
+                    return Blob.getAccBlob(sha1, null);
+                }
+            }
+        }
+        return null;
+    }
 }

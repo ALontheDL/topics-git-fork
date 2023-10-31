@@ -1,3 +1,6 @@
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,20 +13,10 @@ import org.junit.jupiter.api.DisplayName;
 public class NewTreeTester {
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
-        /*
-         * Utils.writeStringToFile("junit_example_file_data.txt", "test file contents");
-         * Utils.deleteFile("index");
-         * Utils.deleteDirectory("objects");
-         */
     }
 
     @AfterAll
     static void tearDownAfterClass() throws Exception {
-        /*
-         * Utils.deleteFile("junit_example_file_data.txt");
-         * Utils.deleteFile("index");
-         * Utils.deleteDirectory("objects");
-         */
     }
 
     @Test
@@ -32,12 +25,8 @@ public class NewTreeTester {
         Tree tree = new Tree();
         tree.add("entry1");
         tree.add("entry2");
-
-        if (tree.entries.contains("entry1") && tree.entries.contains("entry2")) {
-            System.out.println("add method passed.");
-        } else {
-            System.out.println("add method failed.");
-        }
+        assertTrue(tree.entries.contains("entry1"));
+        assertTrue(tree.entries.contains("entry2"));
     }
 
     @Test
@@ -47,12 +36,8 @@ public class NewTreeTester {
         tree.add("entry1");
         tree.add("entry2");
         tree.remove("entry1");
-
-        if (!tree.entries.contains("entry1") && tree.entries.contains("entry2")) {
-            System.out.println("remove method passed.");
-        } else {
-            System.out.println("remove method failed.");
-        }
+        assertFalse(tree.entries.contains("entry1"));
+        assertTrue(tree.entries.contains("entry2"));
     }
 
     @Test

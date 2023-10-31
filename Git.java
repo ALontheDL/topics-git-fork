@@ -13,6 +13,102 @@ public class Git {
         newGit.delete("testGit.txt");
     }
 
+    public void commit(String message) throws IOException, NoSuchAlgorithmException {
+        String headCommitSHA = getHeadCommitSHA();
+        Commit newCommit = new Commit("treeSHA", "author", message, headCommitSHA, null);
+        newCommit.setPrevSHA(headCommitSHA);
+
+        setHeadCommitSHA(newCommit.getShaName());
+        String prevSHA = getPrevCommitSHA(newCommit.getShaName());
+        if (prevSHA != null) {
+            Commit prevCommit = Commit.getCommit(prevSHA);
+            prevCommit.setNextSHA(newCommit.getShaName());
+        }
+    }
+
+    public String getHeadCommitSHA() throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("Git"));
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.split(" : ");
+            if (parts.length == 2) {
+                return parts[1];
+            }
+        }
+        br.close();
+        return null;
+    }
+
+    public void setHeadCommitSHA(String sha) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("Git"));
+        StringBuilder newContent = new StringBuilder();
+        String line;
+        boolean headFound = false;
+
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.split(" : ");
+            if (parts.length == 2) {
+                if (!headFound) {
+                    newContent.append("head : ").append(sha).append('\n');
+                    headFound = true;
+                }
+            } else if (parts.length == 3 && parts[0].equals("blob")) {
+                newContent.append(line).append('\n');
+            }
+        }
+        br.close();
+
+        if (!headFound) {
+            newContent.append("head : ").append(sha).append('\n');
+        }
+        FileWriter fileWriter = new FileWriter("Git");
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        bufferedWriter.write(newContent.toString());
+        bufferedWriter.close();
+        fileWriter.close();
+    }
+
+    public String getPrevCommitSHA(String commitSHA) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("Git"));
+        String line;
+        String prevCommitSHA = null;
+
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.split(" : ");
+            if (parts.length == 2) {
+                if (parts[1].equals(commitSHA)) {
+                    break;
+                }
+                prevCommitSHA = parts[1];
+            }
+        }
+        br.close();
+
+        return prevCommitSHA;
+    }
+
+    public String getNextCommitSHA(String commitSHA) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("Git"));
+        String line;
+        boolean found = false;
+
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.split(" : ");
+            if (parts.length == 2) {
+                if (found) {
+                    br.close();
+                    return parts[1];
+                }
+                if (parts[1].equals(commitSHA)) {
+                    found = true;
+                }
+            }
+        }
+
+        br.close();
+        return null;
+    }
+
     public void init() throws IOException {
         File newFile = new File("Git");
         if (!newFile.exists()) {
