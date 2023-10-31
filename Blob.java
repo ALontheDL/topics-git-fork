@@ -23,61 +23,43 @@ public class Blob {
 
     public static String doSha(String input) {
         try {
-            // getInstance() method is called with algorithm SHA-1
             MessageDigest md = MessageDigest.getInstance("SHA-1");
-
-            // digest() method is called
-            // to calculate message digest of the input string
-            // returned as array of byte
             byte[] messageDigest = md.digest(input.getBytes());
-
-            // Convert byte array into signum representation
             BigInteger no = new BigInteger(1, messageDigest);
-
-            // Convert message digest into hex value
-            String hashtext = no.toString(16);
-
-            // Add preceding 0s to make it 32 bit
-            while (hashtext.length() < 32) {
-                hashtext = "0" + hashtext;
+            String hashText = no.toString(16);
+            while (hashText.length() < 32) {
+                hashText = "0" + hashText;
             }
-
-            // return the HashText
-            return hashtext;
-        }
-
-        // For specifying wrong message digest algorithms
-        catch (NoSuchAlgorithmException e) {
+            return hashText;
+        } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
     public String readText(String fileName) throws IOException {
-        String output = "";
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
-        while (reader.ready()) {
-            int letter = reader.read();
-            output += (char) letter;
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
         }
-        reader.close();
-        return output;
+        return output.toString();
     }
 
     public String getShaName() {
         return shaName;
     }
 
-    public byte[] makeBite(String fileName) throws IOException {
-        String inputString = readText(fileName);
-        byte[] byteArray = inputString.getBytes();
-
-        return byteArray;
+    public byte[] makeBite() throws IOException {
+        String inputString = readText(toTextFile.toString());
+        return inputString.getBytes();
     }
 
     public void makeBlob() throws IOException {
-        byte[] insideFile = makeBite(fileName);
+        byte[] insideFile = makeBite();
         String folderPath = "Objects";
-        Path toObjectsFolder = Paths.get(folderPath, doSha(fileName));
+        Path toObjectsFolder = Paths.get(folderPath, shaName);
         Files.write(toObjectsFolder, insideFile);
     }
 
@@ -85,7 +67,7 @@ public class Blob {
         return toTextFile;
     }
 
-    public Object getFileContents() {
+    public String getFileContents() {
         return fileContents;
     }
 }
