@@ -125,8 +125,6 @@ public class Git {
                     System.out.println("Failed to copy file: " + filename);
                     e.printStackTrace();
                 }
-            } else if (parts.length == 3 && parts[0].equals("tree")) {
-                // Handle directories if needed
             }
         }
     }

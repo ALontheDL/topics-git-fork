@@ -31,8 +31,21 @@ public class Commit {
             String prevEntry = "tree : " + prevTree.getSHA1();
             prevTree.add(prevEntry);
             prevTree.generateBlob();
-            omitEditedAndDeletedFiles(prevTree); // Omit edited and deleted files
+            omitEditedAndDeletedFiles(prevTree);
         }
+    }
+
+    public String createTree(String folderPath, String treeContent) {
+        String sha1 = generateSHA();
+        String path = folderPath + File.separator + sha1;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
+            writer.write(treeContent);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return sha1;
     }
 
     public String getTreeSHA() {
@@ -42,13 +55,13 @@ public class Commit {
     public void writeToFile(String folderPath) {
         String sha1 = generateSHA();
         String path = folderPath + File.separator + sha1;
-
+    
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
             writer.write(generateFile());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+    
         if (prevSHA != null) {
             Commit prev = getCommit(prevSHA);
             prev.setNextSHA(sha1);

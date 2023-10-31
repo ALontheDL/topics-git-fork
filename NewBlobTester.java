@@ -14,14 +14,14 @@ public class NewBlobTester {
     public void testConstructor() throws IOException {
         Blob blob = new Blob("test.txt");
         assertEquals("test.txt", blob.getToTextFile().toString());
-        assertEquals("a94a8fe5ccb19ba61c4c0873d391e987982fbbd3a", blob.getShaName());
+        assertEquals("4b6fcb2d521ef0fd442a5301e7932d16cc9f375a", blob.getShaName());
         assertEquals("This is a test file for reading.\n", blob.getFileContents());
     }
 
     @Test
     public void testDoSha() {
         String input = "Test SHA-1 Hashing";
-        String expectedHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+        String expectedHash = "54d12c68fcc94598a043fde6874292288b244dea";
         String actualHash = Blob.doSha(input);
         assertEquals(expectedHash, actualHash);
     }

@@ -10,13 +10,11 @@ import java.security.NoSuchAlgorithmException;
 
 public class Blob {
     private Path toTextFile;
-    private String fileName;
     private String fileContents;
     private String shaName;
 
     public Blob(String nameOfFile) throws IOException {
         toTextFile = Paths.get(nameOfFile);
-        fileName = nameOfFile;
         fileContents = readText(nameOfFile);
         shaName = doSha(fileContents);
     }
@@ -27,7 +25,8 @@ public class Blob {
             byte[] messageDigest = md.digest(input.getBytes());
             BigInteger no = new BigInteger(1, messageDigest);
             String hashText = no.toString(16);
-            while (hashText.length() < 32) {
+
+            while (hashText.length() < 40) {
                 hashText = "0" + hashText;
             }
             return hashText;
@@ -41,7 +40,7 @@ public class Blob {
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+                output.append(line);
             }
         }
         return output.toString();
@@ -51,9 +50,8 @@ public class Blob {
         return shaName;
     }
 
-    public byte[] makeBite() throws IOException {
-        String inputString = readText(toTextFile.toString());
-        return inputString.getBytes();
+    public byte[] makeBite() {
+        return fileContents.getBytes();
     }
 
     public void makeBlob() throws IOException {
