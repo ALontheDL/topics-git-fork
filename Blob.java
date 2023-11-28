@@ -86,4 +86,8 @@ public class Blob {
             return null;
         }
     }
+
+    public Object getContent() {
+        return getFileContents();
+    }
 }

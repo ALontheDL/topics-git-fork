@@ -47,8 +47,8 @@ public class FinalGitTester {
     public void testSingleCommit() throws IOException, NoSuchAlgorithmException {
         createTestFile("file1.txt", "Test 1");
         createTestFile("file2.txt", "Test 2");
-        git.add("file1.txt");
-        git.add("file2.txt");
+        git.add(Paths.get(testFolderPath, "file1.txt").toString());
+        git.add(Paths.get(testFolderPath, "file2.txt").toString());
         git.commit("Initial");
         String currentCommitSHA = git.getHeadCommitSHA();
         String currentTreeSHA = Commit.getCommitTreeSHA(currentCommitSHA);
@@ -69,9 +69,9 @@ public class FinalGitTester {
     public void testMultipleCommits() throws IOException, NoSuchAlgorithmException {
         createTestFile("file1.txt", "Test 1");
         createTestFile("file2.txt", "Test 2");
-        git.add("file1.txt");
-        git.add("file2.txt");
-        git.commit("First");
+        git.add(Paths.get(testFolderPath, "file1.txt").toString());
+        git.add(Paths.get(testFolderPath, "file2.txt").toString());
+        git.commit("Initial");
 
         createTestFile("file3.txt", "Test data 3");
         git.add("file3.txt");
@@ -109,15 +109,15 @@ public class FinalGitTester {
     public void testMultipleCommitsUniqueData() throws IOException, NoSuchAlgorithmException {
         createTestFile("file1.txt", "Test 1");
         createTestFile("file2.txt", "Test 2");
-        git.add("file1.txt");
-        git.add("file2.txt");
-        git.commit("First");
+        git.add(Paths.get(testFolderPath, "file1.txt").toString());
+        git.add(Paths.get(testFolderPath, "file2.txt").toString());
+        git.commit("Initial");
 
         createTestFile("file3.txt", "Diff1");
-        git.add("file3.txt");
+        git.add(Paths.get(testFolderPath, "file3.txt").toString());
         createTestFolder("myFolder");
         createTestFileInFolder("file4.txt", "Diff2");
-        git.add("myFolder");
+        git.add(Paths.get(testFolderPath, "file4.txt").toString());
         git.commit("Second");
 
         String firstCommitSHA = git.getHeadCommitSHA();
@@ -168,8 +168,8 @@ public class FinalGitTester {
     public void testCleanUpAfterTest() throws IOException, NoSuchAlgorithmException {
         createTestFile("file1.txt", "Test 1");
         createTestFile("file2.txt", "Test 2");
-        git.add("file1.txt");
-        git.add("file2.txt");
+        git.add(Paths.get(testFolderPath, "file1.txt").toString());
+        git.add(Paths.get(testFolderPath, "file2.txt").toString());
         git.commit("Test");
 
         assertTrue(Files.exists(Paths.get("Git")));
@@ -180,7 +180,7 @@ public class FinalGitTester {
         assertFalse(Files.exists(Paths.get("objects")));
     }
 
-private void createTestFolder(String folderName) {
+    private void createTestFolder(String folderName) {
         File folder = new File(Paths.get(testFolderPath, folderName).toString());
         folder.mkdirs();
     }
@@ -193,7 +193,6 @@ private void createTestFolder(String folderName) {
         writer.write(content);
         writer.close();
     }
-
 
     private void createTestFile(String fileName, String content) throws IOException {
         String filePath = Paths.get(testFolderPath, fileName).toString();
